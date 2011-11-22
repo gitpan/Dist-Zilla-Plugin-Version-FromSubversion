@@ -12,4 +12,5 @@ t/00-compile.t
 t/90-pod.t
 t/91-pod-coverage.t
 t/92-kwalitee.t
+t/93-check-version.t
 t/release-kwalitee.t

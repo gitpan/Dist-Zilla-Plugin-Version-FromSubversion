@@ -14,10 +14,7 @@ my %WriteMakefileArgs = (
   "BUILD_REQUIRES" => {
     "File::Find" => 0,
     "File::Temp" => 0,
-    "Test::Kwalitee" => 0,
-    "Test::More" => 0,
-    "Test::Pod" => "1.00",
-    "Test::Pod::Coverage" => 0
+    "Test::More" => 0
   },
   "CONFIGURE_REQUIRES" => {
     "ExtUtils::MakeMaker" => "6.30"
@@ -27,13 +24,16 @@ my %WriteMakefileArgs = (
   "LICENSE" => "perl",
   "NAME" => "Dist::Zilla::Plugin::Version::FromSubversion",
   "PREREQ_PM" => {
-    "Alien::SVN" => 0,
+    "Dist::Zilla" => "4.3",
+    "Dist::Zilla::Role::TextTemplate" => 0,
+    "Dist::Zilla::Role::VersionProvider" => 0,
     "Moose" => 0,
     "SVN::Client" => 0,
+    "SVN::Core" => 0,
     "strict" => 0,
     "warnings" => 0
   },
-  "VERSION" => "1.000002",
+  "VERSION" => "1.000008",
   "test" => {
     "TESTS" => "t/*.t"
   }
