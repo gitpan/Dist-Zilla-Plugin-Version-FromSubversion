@@ -1,5 +1,11 @@
 Changes for Dist-Zilla-Plugin-Version-FromSubversion
 
+1.000012  2011-11-26 00:18:35 Europe/Paris
+	Add 'fallback_revision' option to enable support for distribution
+	  source exported (svn export) from Subversion. When working from a
+	  working copy, the file dist.ini is checked for having 'svn:keywords'
+	  enabled so that the expansion will work.
+
 1.000008  2011-11-23 00:11:14 Europe/Paris
 	No code change in the plugin. Only dist fixes.
 	Add a test to avoid the broken version number in the D:Z:P:V:FS release

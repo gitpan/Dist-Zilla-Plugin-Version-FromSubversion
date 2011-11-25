@@ -2,7 +2,7 @@ use strict;
 use warnings;
 package Dist::Zilla::Plugin::Version::FromSubversion;
 {
-  $Dist::Zilla::Plugin::Version::FromSubversion::VERSION = '1.000008';
+  $Dist::Zilla::Plugin::Version::FromSubversion::VERSION = '1.000012';
 }
 
 use Moose;
@@ -27,16 +27,45 @@ has format => (
               . q<{{$ENV{DEV} ? (sprintf '_%03u', $ENV{DEV}) : ''}}>
 );
 
+has fallback_revision => (
+    is       => 'ro',
+    isa      => 'Str',
+);
+
 
 sub provide_version
 {
     my $self = shift;
 
-    require SVN::Client;
-    my $svn = SVN::Client->new or die "can't initialize SVN::Client";
-
     my $rev;
-    $svn->info("", undef, undef, sub { $rev = $_[1]->rev }, 0);
+    my $root = $self->zilla->root;
+
+    # Are we in a working copy?
+    if (-d $root->subdir('.svn')) {
+	require SVN::Client;
+	my $svn = SVN::Client->new or die "can't initialize SVN::Client";
+
+	$svn->info("", undef, undef, sub { $rev = $_[1]->rev }, 0);
+
+	my $dist_ini = $root->file('dist.ini')->absolute->stringify;
+	if (-f $dist_ini && $self->fallback_revision) {
+	    my $kwd = $svn->propget('svn:keywords', $dist_ini, undef, 0);
+	    unless (exists $kwd->{$dist_ini}
+		&& grep /^Rev(?:ision)$/, split ' ', $kwd->{$dist_ini}) {
+		$self->log_fatal("enable svn:keywords expansion on dist.ini to activate fallback_revision:\n  svn propset svn:keywords \"Revision\" dist.ini");
+	    }
+	}
+    } else {
+	my $fb = $self->fallback_revision;
+	unless ($fb) {
+	    $self->log_fatal("not in a Subversion working copy. Use the fallback_revision option in dist.ini or switch to [AutoVersion]");
+	}
+	unless ($fb =~ /\$(?:Rev(?:ision)?|LastChangedRevision): ([0-9]+)\S*\s*\$/) {
+	    $self->log_fatal('invalid fallback_revision value: use $Revision: $');
+	}
+	$rev = $1;
+    }
+
 
     my $version = $self->fill_in_string(
 	$self->format,
@@ -46,7 +75,7 @@ sub provide_version
 	},
     );
 
-    $self->log_debug([ 'providing version %s', $version ]);
+    $self->log([ 'providing version %s', $version ]);
 
     return $version;
 }
@@ -63,7 +92,7 @@ Dist::Zilla::Plugin::Version::FromSubversion - Use the revision of the working d
 
 =head1 VERSION
 
-version 1.000008
+version 1.000012
 
 =head1 SYNOPSIS
 
@@ -74,6 +103,8 @@ In dist.ini:
     major = 0
     ; optional, default is something like sprintf('%u.%06u', $major, $revision)
     format = {{ $major }}.{{ sprintf('%06u', $revision) }}
+    ; optional. The svn:keywords property must be set to 'Revision' on dist.ini
+    fallback_revision = $Revision: $
 
 To do a release:
 
@@ -91,6 +122,12 @@ version scheme if that goes wrong!
 This plugin build a version number for a release from the Subversion revision
 number of the current directory.
 
+The C<fallback_revision> option can be used for the cases where the distribution
+is not built from a working copy but from an export (svn export). For example,
+integration tools such as Jenkins. For this case we are using the
+C<svn:keywords> property on F<dist.ini> to be able to retrieve the revision
+number from a known place.
+
 Notes:
 
 =over 4
@@ -101,24 +138,14 @@ It is the user responsability to keep the directory up to date (with
 "C<svn update .>"). The plugin currently does not even warn if the release
 is made from a directory which is not clean (everything committed).
 
-=item *
-
-This plugin works only from a working copy of your repository. This means that
-the F<.svn> directory must exists.
-
-So this will not work from content extracted from the repository using
-C<svn export>. If you want to make release from that context, use this instead:
-
-    $ svn propset svn:keywords Revision dist.ini
-
-In dist.ini:
-
-    [AutoVersion]
-    major = 1
-    format = {{ $major }}.{{ sprintf '%06u', ("$Revision: $" =~ /(\d+)/) }}
-
-
 =back
+
+=head1 EXAMPLE
+
+This distribution is built with itself. You can checkout its Subversion
+repository from Google Code:
+
+  svn checkout http://dist-zilla-plugin-version-fromsubversion.googlecode.com/svn/trunk/ DZ-P-Version-FromSubversion
 
 =head1 SEE ALSO
 
