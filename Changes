@@ -1,5 +1,10 @@
 Changes for Dist-Zilla-Plugin-Version-FromSubversion
 
+1.000017  2012-01-13 01:19:13 Europe/Paris
+	Add 'fallback_file' option.
+	Fixes 'fallback_revision' error in svn:keywords check.
+	Add repository metadata in META.json.
+
 1.000012  2011-11-26 00:18:35 Europe/Paris
 	Add 'fallback_revision' option to enable support for distribution
 	  source exported (svn export) from Subversion. When working from a

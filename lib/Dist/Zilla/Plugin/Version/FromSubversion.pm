@@ -2,7 +2,7 @@ use strict;
 use warnings;
 package Dist::Zilla::Plugin::Version::FromSubversion;
 {
-  $Dist::Zilla::Plugin::Version::FromSubversion::VERSION = '1.000012';
+  $Dist::Zilla::Plugin::Version::FromSubversion::VERSION = '1.000017';
 }
 
 use Moose;
@@ -32,6 +32,11 @@ has fallback_revision => (
     isa      => 'Str',
 );
 
+has fallback_file => (
+    is       => 'ro',
+    isa      => 'ArrayRef',
+    default  => sub { [ ] },
+);
 
 sub provide_version
 {
@@ -51,8 +56,34 @@ sub provide_version
 	if (-f $dist_ini && $self->fallback_revision) {
 	    my $kwd = $svn->propget('svn:keywords', $dist_ini, undef, 0);
 	    unless (exists $kwd->{$dist_ini}
-		&& grep /^Rev(?:ision)$/, split ' ', $kwd->{$dist_ini}) {
-		$self->log_fatal("enable svn:keywords expansion on dist.ini to activate fallback_revision:\n  svn propset svn:keywords \"Revision\" dist.ini");
+		&& grep /^(?:Rev(?:ision)?|LastChangedRevision)$/, split ' ', $kwd->{$dist_ini}) {
+		$self->log("enable svn:keywords expansion on dist.ini to activate fallback_revision:\n  svn propset svn:keywords \"Revision\" dist.ini");
+	    }
+	}
+	if (@{ $self->fallback_file }) {
+	    foreach my $file (@{ $self->fallback_revision }) {
+		my $path = $root->file($file)->absolute->stringify;
+		my $kwd = $svn->propget('svn:keywords', $path, undef, 0);
+		unless (exists $kwd->{$path}) {
+		    # TODO fix path to use platform path separators
+		    $self->log_fatal(
+			 "enable svn:keywords expansion on $file to activate fallback_file:\n"
+			."  svn propset svn:keywords \"Revision\" $file");
+		} else {
+		    my @kwd_rev = grep /^(?:Rev(?:ision)?|LastChangedRevision)$/, split ' ', $kwd->{$path};
+		    unless (@kwd_rev) {
+			$self->log_fatal(
+			     "enable svn:keywords expansion on $file to activate fallback_file:\n"
+			    ."  svn propset svn:keywords \"$kwd->{$path} Revision\" $file");
+		    } else {
+			my ($kwd) = $self->_extract_rev_keyword($path, @kwd_rev);
+			unless (defined $kwd) {
+			    $self->log_fatal(
+				"keyword $kwd_rev[0] is missing in $path"
+			    );
+			}
+		    }
+		}
 	    }
 	}
     } else {
@@ -81,6 +112,25 @@ sub provide_version
 }
 
 
+sub _extract_rev_keyword
+{
+    my $self = shift;
+    my $file = shift;
+    my $kwd_rev_re =
+	  @_
+	? ('\$'.join('|', @_).'::?\s*(\S+)\s*\$')
+	: qr/\$(Rev(?:ision)?|LastChangedRevision)::?\s*([0-9]+[A-Z])?\s*\$/;
+    my $content = do {
+	open my $f, '<:bytes', $file
+	    or $self->log_fatal("can't open $file: $!");
+	local $/;
+	<$f>
+    };
+    my ($keyword, $rev) = $content =~ /$kwd_rev_re/;
+    ($keyword, $rev)
+}
+
+
 no Moose;
 __PACKAGE__->meta->make_immutable;
 1;
@@ -92,7 +142,7 @@ Dist::Zilla::Plugin::Version::FromSubversion - Use the revision of the working d
 
 =head1 VERSION
 
-version 1.000012
+version 1.000017
 
 =head1 SYNOPSIS
 

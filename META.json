@@ -4,7 +4,7 @@
       "Olivier Mengu\u00c3\u00a9 <dolmen@cpan.org>"
    ],
    "dynamic_config" : 0,
-   "generated_by" : "Dist::Zilla version 4.300003, CPAN::Meta::Converter version 2.112621",
+   "generated_by" : "Dist::Zilla version 4.300006, CPAN::Meta::Converter version 2.113640",
    "license" : [
       "perl_5"
    ],
@@ -45,8 +45,12 @@
       "bugtracker" : {
          "mailto" : "bug-dist-zilla-plugin-version-fromsubversion at rt.cpan.org",
          "web" : "http://rt.cpan.org/Public/Dist/Display.html?Name=Dist-Zilla-Plugin-Version-FromSubversion"
+      },
+      "repository" : {
+         "type" : "svn",
+         "url" : "https://dist-zilla-plugin-version-fromsubversion.googlecode.com/svn/trunk"
       }
    },
-   "version" : "1.000012"
+   "version" : "1.000017"
 }
 
