@@ -1,5 +1,8 @@
 Changes for Dist-Zilla-Plugin-Version-FromSubversion
 
+1.000019  2012-01-13 01:26:10 Europe/Paris
+	Fixes repository metadata in META.json.
+
 1.000017  2012-01-13 01:19:13 Europe/Paris
 	Add 'fallback_file' option.
 	Fixes 'fallback_revision' error in svn:keywords check.

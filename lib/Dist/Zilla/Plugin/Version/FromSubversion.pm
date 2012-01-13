@@ -2,7 +2,7 @@ use strict;
 use warnings;
 package Dist::Zilla::Plugin::Version::FromSubversion;
 {
-  $Dist::Zilla::Plugin::Version::FromSubversion::VERSION = '1.000017';
+  $Dist::Zilla::Plugin::Version::FromSubversion::VERSION = '1.000019';
 }
 
 use Moose;
@@ -142,7 +142,7 @@ Dist::Zilla::Plugin::Version::FromSubversion - Use the revision of the working d
 
 =head1 VERSION
 
-version 1.000017
+version 1.000019
 
 =head1 SYNOPSIS
 

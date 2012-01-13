@@ -28,4 +28,4 @@ requires:
 resources:
   bugtracker: http://rt.cpan.org/Public/Dist/Display.html?Name=Dist-Zilla-Plugin-Version-FromSubversion
   repository: https://dist-zilla-plugin-version-fromsubversion.googlecode.com/svn/trunk
-version: 1.000017
+version: 1.000019
